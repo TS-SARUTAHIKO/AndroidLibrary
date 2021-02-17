@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.CallSuper
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
@@ -51,13 +50,10 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
     /** ノードのクリックの処理。デフォルトではノードの展開状態の反転を行う。 */
     var onClickListener = { _ : View, node : TreeViewNode -> node.toggle() }
-    /** ノードの長押しの処理。デフォルトでは何もしない。 */
-    var onLongClickListener = { _ : View, _ : TreeViewNode -> false }
-    /** ノードのタッチの処理。デフォルトではプレス時にノードの選択を行う。 */
-    var onTouchListener = { _ : View, event : MotionEvent, node : TreeViewNode ->
-        if( event.actionMasked == MotionEvent.ACTION_DOWN ) selected = node ;
-        false
-    }
+    /** ノードの長押しの処理。デフォルトではノードを選択する。 */
+    var onLongClickListener = { _ : View, node : TreeViewNode -> selected = node ; false }
+    /** ノードのタッチの処理。デフォルトでは何もしない。 */
+    var onTouchListener = { _ : View, _ : MotionEvent, _ : TreeViewNode -> false }
     /** [selected] が変化した際のコールバック */
     var onSelected : (TreeViewNode?)->(Unit) = {  }
 
@@ -211,6 +207,7 @@ fun RecyclerView.asTree(root : TreeViewRoot = TreeRoot {  }, init : (TreeViewRoo
 
     return adapter as RecyclerTreeViewAdapter
 }
+
 /**
  * [adapter] を [RecyclerTreeViewAdapter] として取得する
  *
