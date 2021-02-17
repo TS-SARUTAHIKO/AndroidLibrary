@@ -1,0 +1,3 @@
+include ':RecyclerTreeViewAdapter'
+include ':app'
+rootProject.name = "AndroidLibrary"
