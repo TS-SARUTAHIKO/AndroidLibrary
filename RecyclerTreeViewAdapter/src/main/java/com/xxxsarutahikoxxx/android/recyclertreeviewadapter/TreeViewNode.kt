@@ -40,6 +40,9 @@ interface TreeViewNode {
     fun expandAll(){
         (listOf(this) + allChildren).filter { ! it.isExpanded }.forEach { it.expand() }
     }
+    fun collapseAll(){
+        (listOf(this) + allChildren).filter { it.isExpanded }.forEach { it.collapse() }
+    }
 
     val parent : TreeViewNode? get() = nodeParams.parent
     val parents : List<TreeViewNode> get(){
@@ -53,17 +56,17 @@ interface TreeViewNode {
         nodeParams.children.add(index, node)
         node.nodeParams.parent = this
 
-        (root as? TreeViewRoot)?.let { it.onAdded(it, this) }
+        (root as? TreeViewRoot)?.let { it.onAdded(it, node) }
 
         return this
     }
     fun remove(node : TreeViewNode){
-        (root as? TreeViewRoot)?.let { it.onPreRemoved(it, this) }
+        (root as? TreeViewRoot)?.let { it.onPreRemoved(it, node) }
 
         nodeParams.children.remove(node)
         node.nodeParams.parent = null
 
-        (root as? TreeViewRoot)?.let { it.onRemoved(it, this) }
+        (root as? TreeViewRoot)?.let { it.onRemoved(it, node) }
     }
     val allChildren : List<TreeViewNode>
         get() = children.map { listOf(it) + it.allChildren }.flatten()
