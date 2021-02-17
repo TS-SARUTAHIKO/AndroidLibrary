@@ -48,18 +48,3 @@ dependencies {
 }
 
 
-def versionName = "0.0.2"
-def repo = new File(rootDir, "repository")
-
-apply plugin: 'maven'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository url: "file://${repo.absolutePath}"
-            pom.version = "${versionName}"
-            pom.groupId = 'com.xxxsarutahikoxxx.android'
-            pom.artifactId = 'AndroidLibrary'
-        }
-    }
-}
