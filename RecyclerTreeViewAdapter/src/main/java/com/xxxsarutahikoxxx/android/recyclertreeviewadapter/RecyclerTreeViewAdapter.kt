@@ -1,7 +1,6 @@
 package com.xxxsarutahikoxxx.android.recyclertreeviewadapter
 
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -13,7 +12,6 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
-
 
 /**
  * 既存の [RecyclerView] に対して [adapter] としてセットすることでツリー構造を表示することが可能なアダプター
@@ -52,11 +50,11 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         }
 
     /** ノードのクリックの処理。デフォルトではノードの展開状態の反転を行う。 */
-    var onClickListener = { view : View, node : TreeViewNode -> node.toggle() }
-    /** ノードの長押しの処理。デフォルトではノードの選択を行う。 */
-    var onLongClickListener = { view : View, node : TreeViewNode -> selected = node ; true }
-    /** ノードのタッチの処理。デフォルトではノードの選択を行う。 */
-    var onTouchListener = { view : View, event : MotionEvent, node : TreeViewNode ->
+    var onClickListener = { _ : View, node : TreeViewNode -> node.toggle() }
+    /** ノードの長押しの処理。デフォルトでは何もしない。 */
+    var onLongClickListener = { _ : View, _ : TreeViewNode -> false }
+    /** ノードのタッチの処理。デフォルトではプレス時にノードの選択を行う。 */
+    var onTouchListener = { _ : View, event : MotionEvent, node : TreeViewNode ->
         if( event.actionMasked == MotionEvent.ACTION_DOWN ) selected = node ;
         false
     }
@@ -111,6 +109,9 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
             // ノードが除去される前に呼ばれるために他とは違う処理を行う
             val removed = it
             treeItems = treeRoot.expandedChildren.filter { removed !in it.parents && removed != it }
+
+            // 変更を通知する
+            notifyItemRangeInserted(range.first, range.second)
         }
         onRemoved = {
             // Leaf <-> Branch が変更されたのでノード情報を更新する
@@ -144,7 +145,7 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
         onBindViewHolder(holder, item)
     }
-    private fun onBindViewHolder(holder : Holder, node : TreeViewNode){
+    protected open fun onBindViewHolder(holder : Holder, node : TreeViewNode){
         // 矢印の画像を更新する
         holder.arrow?.setImageResource(
             when {
@@ -168,42 +169,36 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         holder.title?.setTextColor( if(node == selected) Color.BLUE else Color.BLACK )
 
         // インデントを更新する
-        (holder.arrow?.layoutParams as? LinearLayoutCompat.LayoutParams)?.apply {
-            marginStart = (treeRowIndent * displayMetricsDensity).toInt() * (node.layer-1)
-        }
+        holder.margin?.layoutParams?.width = (treeRowIndent * displayMetricsDensity).toInt() * (node.layer-1)
     }
 
-    /** レイアウトリソースの取得関数 */
-    var getItemViewLayout : (TreeViewNode)->(Int) = { R.layout.tree_view_row }
-    /** タイトル文字列の取得関数 */
-    var getTitleText : (node : TreeViewNode) -> String = { node ->
-        val content = node.content
-        when {
-            content is File -> content.name
-            else -> content.toString()
-        }
-    }
+    /**
+     * レイアウトリソースの取得関数
+     *
+     * デフォルトでは常に R.layout.recycler_tree_view_simple_row を返す
+     * */
+    var getItemViewLayout : (TreeViewNode)->(Int) = { R.layout.recycler_tree_view_simple_row }
+    /**
+     * タイトル文字列の取得関数
+     *
+     * デフォルトでは [node.content] が File の時のみ File.name を返し、それ以外は [node.content.toString()] を返す
+     * */
+    var getTitleText : (node : TreeViewNode) -> String = { node -> node.content?.run { if( this is File ) name else this.toString() } ?: "null" }
     /**
      * アイコン画像の取得関数
      *
      * null ならアイコンは非表示(gone)。それ以外なら ResourceID と解釈する。
      *
-     * 後からノードごとのアイコンを指定するための関数。
+     * デフォルトでは常に null を返す
      *  */
-    var getIconResource : (node : TreeViewNode, selected : Boolean) -> Int? = { node, _ ->
-        val content = node.content
-        when {
-            content is File && content.isDirectory -> R.drawable.directory
-            content is File -> R.drawable.file
-            else -> null
-        }
-    }
+    var getIconResource : (node : TreeViewNode, selected : Boolean) -> Int? = { _, _ -> null }
 
     var titleTextSize : Int = 10
     var treeRowIndent : Int = 15
 
 
     inner open class Holder(val view : View) : RecyclerView.ViewHolder(view) {
+        open val margin = view.findViewById<View?>(R.id.TreeViewRowMargin)
         open val arrow = view.findViewById<ImageView?>(R.id.TreeViewRowArrow)
         open val icon = view.findViewById<ImageView?>(R.id.TreeViewRowIcon)
         open val title = view.findViewById<TextView?>(R.id.TreeViewRowTitle)
