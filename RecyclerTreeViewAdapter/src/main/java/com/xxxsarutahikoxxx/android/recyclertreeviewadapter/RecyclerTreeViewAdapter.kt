@@ -159,8 +159,11 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         }
 
         // タイトルテキストを更新する
-        holder.title?.text = nodeToText(node)
+        holder.title?.text = nodeToTitle(node)
         holder.title?.setTextColor( if(node == selected) Color.BLUE else Color.BLACK )
+
+        // タイトルテキストを更新する
+        holder.tips?.text = nodeToTips(node)
 
         // インデントを更新する
         holder.margin?.layoutParams?.width = (layerIndent * displayMetricsDensity).toInt() * (node.layer-1)
@@ -176,12 +179,6 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
      * */
     var nodeToLayout : (TreeViewNode)->(Int) = { R.layout.recycler_tree_view_simple_row }
     /**
-     * タイトル文字列の取得関数
-     *
-     * デフォルトでは [node.content] が File の時のみ File.name を返し、それ以外は [node.content.toString()] を返す
-     * */
-    var nodeToText : (node : TreeViewNode) -> (String) = { node -> node.content?.run { if( this is File ) name else this.toString() } ?: "null" }
-    /**
      * アイコン画像の取得関数
      *
      * null ならアイコンは非表示(gone)。それ以外なら ResourceID と解釈する。
@@ -189,6 +186,18 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
      * デフォルトでは常に null を返す
      *  */
     var nodeToIconId : (node : TreeViewNode, selected : Boolean) -> (Int?) = { _, _ -> null }
+    /**
+     * タイトル文字列の取得関数
+     *
+     * デフォルトでは [node.content] が File の時のみ File.name を返し、それ以外は [node.content.toString()] を返す
+     * */
+    var nodeToTitle : (node : TreeViewNode) -> (String) = { node -> node.content?.run { if( this is File ) name else this.toString() } ?: "null" }
+    /**
+     * Tips 文字列の取得関数
+     *
+     * デフォルトでは空の文字列を返す
+     * */
+    var nodeToTips : (node : TreeViewNode) -> (String) = { _ -> "" }
     /**
      * ツリーの行([holder])の追加的な情報更新を行う
      * */
@@ -198,10 +207,11 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
 
     inner open class Holder(val view : View) : RecyclerView.ViewHolder(view) {
-        open val margin = view.findViewById<View?>(R.id.TreeViewRowMargin)
-        open val arrow = view.findViewById<ImageView?>(R.id.TreeViewRowArrow)
-        open val icon = view.findViewById<ImageView?>(R.id.TreeViewRowIcon)
-        open val title = view.findViewById<TextView?>(R.id.TreeViewRowTitle)
+        open val margin = view.findViewById<View?>(R.id.TreeViewRow_Margin)
+        open val arrow = view.findViewById<ImageView?>(R.id.TreeViewRow_Arrow)
+        open val icon = view.findViewById<ImageView?>(R.id.TreeViewRow_Icon)
+        open val title = view.findViewById<TextView?>(R.id.TreeViewRow_Title)
+        open val tips = view.findViewById<TextView?>(R.id.TreeViewRow_Tips)
     }
 }
 
