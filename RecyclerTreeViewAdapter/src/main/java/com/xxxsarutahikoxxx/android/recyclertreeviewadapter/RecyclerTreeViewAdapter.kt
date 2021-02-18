@@ -127,7 +127,7 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
         return Holder(view)
     }
-    override fun getItemViewType(position: Int): Int = getItemViewLayout(treeItems[position])
+    override fun getItemViewType(position: Int): Int = nodeToLayout(treeItems[position])
 
     @CallSuper
     override fun onBindViewHolder(holder: Holder, position: Int) {
@@ -137,11 +137,9 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         holder.view.setOnLongClickListener { view -> onLongClickListener(view, item) }
         holder.view.setOnTouchListener { view, event -> onTouchListener(view, event, item) }
 
-        holder.title?.textSize = titleTextSize*displayMetricsDensity
-
         onBindViewHolder(holder, item)
     }
-    protected open fun onBindViewHolder(holder : Holder, node : TreeViewNode){
+    open fun onBindViewHolder(holder : Holder, node : TreeViewNode){
         // 矢印の画像を更新する
         holder.arrow?.setImageResource(
             when {
@@ -152,7 +150,7 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         )
 
         // Icon 画像を更新する
-        when( val res = getIconResource(node, selected == node) ){
+        when( val res = nodeToIconId(node, selected == node) ){
             null -> holder.icon?.visibility = View.GONE
             else -> {
                 holder.icon?.setImageResource(res)
@@ -161,11 +159,14 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         }
 
         // タイトルテキストを更新する
-        holder.title?.text = getTitleText(node)
+        holder.title?.text = nodeToText(node)
         holder.title?.setTextColor( if(node == selected) Color.BLUE else Color.BLACK )
 
         // インデントを更新する
-        holder.margin?.layoutParams?.width = (treeRowIndent * displayMetricsDensity).toInt() * (node.layer-1)
+        holder.margin?.layoutParams?.width = (layerIndent * displayMetricsDensity).toInt() * (node.layer-1)
+
+        // 追加的な効果を適用する
+        bindViewHolder(holder, node)
     }
 
     /**
@@ -173,13 +174,13 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
      *
      * デフォルトでは常に R.layout.recycler_tree_view_simple_row を返す
      * */
-    var getItemViewLayout : (TreeViewNode)->(Int) = { R.layout.recycler_tree_view_simple_row }
+    var nodeToLayout : (TreeViewNode)->(Int) = { R.layout.recycler_tree_view_simple_row }
     /**
      * タイトル文字列の取得関数
      *
      * デフォルトでは [node.content] が File の時のみ File.name を返し、それ以外は [node.content.toString()] を返す
      * */
-    var getTitleText : (node : TreeViewNode) -> String = { node -> node.content?.run { if( this is File ) name else this.toString() } ?: "null" }
+    var nodeToText : (node : TreeViewNode) -> (String) = { node -> node.content?.run { if( this is File ) name else this.toString() } ?: "null" }
     /**
      * アイコン画像の取得関数
      *
@@ -187,10 +188,13 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
      *
      * デフォルトでは常に null を返す
      *  */
-    var getIconResource : (node : TreeViewNode, selected : Boolean) -> Int? = { _, _ -> null }
+    var nodeToIconId : (node : TreeViewNode, selected : Boolean) -> (Int?) = { _, _ -> null }
+    /**
+     * ツリーの行([holder])の追加的な情報更新を行う
+     * */
+    var bindViewHolder : (holder : Holder, node : TreeViewNode) -> (Unit) = { _,_ -> }
 
-    var titleTextSize : Int = 10
-    var treeRowIndent : Int = 15
+    var layerIndent : Int = 15
 
 
     inner open class Holder(val view : View) : RecyclerView.ViewHolder(view) {
