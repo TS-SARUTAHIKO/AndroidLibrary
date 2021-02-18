@@ -92,13 +92,19 @@ interface TreeViewRoot : TreeViewNode {
     var onRemoved : TreeViewRoot.(node : TreeViewNode) -> (Unit)
 }
 
+
+
 /**
- * [TreeViewNode] のデフォルト実装を返す
+ * [treeNode] のデフォルト実装を返す
+ *
+ * [childFactory] が指定されている場合はそれによって子となる [CONTENT] を取得して再帰的に子ノードを作成する
+ *
+ * [init] が指定されている場合は [init] によって返されるノードの初期化処理が行われる
  * */
-fun TreeRoot( init : TreeViewRoot.()->(Unit) ) : TreeViewRoot {
+fun <CONTENT : Any?> treeRoot(content : CONTENT, childFactory : (CONTENT)->(List<CONTENT>) = { listOf() }, init : TreeViewRoot.()->(Unit) = {} ) : TreeViewRoot {
     return object  : TreeViewRoot {
         override val nodeParams: NodeParams = defaultNodeParams
-        override var content : Any? = "Root"
+        override var content : Any? = content
 
         override var onExpanded: TreeViewRoot.(node: TreeViewNode) -> Unit = {}
         override var onCollapsed: TreeViewRoot.(node: TreeViewNode) -> Unit = {}
@@ -106,23 +112,35 @@ fun TreeRoot( init : TreeViewRoot.()->(Unit) ) : TreeViewRoot {
         override var onPreRemoved: TreeViewRoot.(node: TreeViewNode) -> Unit = {}
         override var onRemoved: TreeViewRoot.(node: TreeViewNode) -> Unit = {}
     }.apply {
+        childFactory(content).forEach {
+            add( treeNode(it, childFactory) )
+        }
+
         init()
     }
 }
 /**
- * [TreeViewRoot] のデフォルト実装を返す
+ * [treeRoot] のデフォルト実装を返す
+ *
+ * [childFactory] が指定されている場合はそれによって子となる [CONTENT] を取得して再帰的に子ノードを作成する
+ *
+ * [init] が指定されている場合は [init] によって返されるノードの初期化処理が行われる
  * */
-fun TreeNode(content : Any) : TreeViewNode {
+fun <CONTENT : Any?> treeNode(content : CONTENT, childFactory : (CONTENT)->(List<CONTENT>) = { listOf() }, init : TreeViewNode.()->(Unit) = {} ) : TreeViewNode {
     return object : TreeViewNode {
         override val nodeParams: NodeParams = defaultNodeParams
         override var content : Any? = content
+    }.apply {
+        childFactory(content).forEach {
+            add( treeNode(it, childFactory) )
+        }
+
+        init()
     }
 }
-
 /** 子ノード追加のシンタックス・シュガー */
-fun TreeViewNode.create(content : Any, init : TreeViewNode.()->(Unit) = {}){
-    val child = TreeNode(content)
-    add(child)
-    child.init()
+fun <CONTENT : Any?> TreeViewNode.create(content : CONTENT, childFactory : (CONTENT)->(List<CONTENT>) = { listOf() }, init : TreeViewNode.()->(Unit) = {}){
+    add(treeNode(content, childFactory, init))
 }
+
 

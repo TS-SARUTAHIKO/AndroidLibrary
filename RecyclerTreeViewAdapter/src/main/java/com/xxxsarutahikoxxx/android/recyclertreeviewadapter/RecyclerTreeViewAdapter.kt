@@ -201,7 +201,7 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
     }
 }
 
-fun RecyclerView.asTree(root : TreeViewRoot = TreeRoot {  }, init : (TreeViewRoot).()->(Unit) ) : RecyclerTreeViewAdapter {
+fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeViewRoot).()->(Unit) ) : RecyclerTreeViewAdapter {
     layoutManager = LinearLayoutManager( context )
     adapter = RecyclerTreeViewAdapter( root.apply(init) )
 
