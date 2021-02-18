@@ -28,7 +28,9 @@ class MainActivity : AppCompatActivity() {
             create("c2"){
                 create("c2-1")
                 create("c2-2"){
-                    create("c2-2-1")
+                    create("c2-2-1"){
+                        create("c2-2-1----------------------------------------------------------------------------")
+                    }
                 }
             }
             create("c3"){
