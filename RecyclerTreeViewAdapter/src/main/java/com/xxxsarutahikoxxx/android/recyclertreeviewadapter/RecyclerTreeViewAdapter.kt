@@ -6,8 +6,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.CallSuper
+import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
@@ -161,6 +164,10 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         // タイトルテキストを更新する
         holder.title?.text = nodeToTitle(node)
         holder.title?.setTextColor( if(node == selected) Color.BLUE else Color.BLACK )
+        (holder.title?.layoutParams as? LinearLayoutCompat.LayoutParams)?.apply {
+            topMargin = (this@RecyclerTreeViewAdapter.topMargin * displayMetricsDensity).toInt()
+            bottomMargin = (this@RecyclerTreeViewAdapter.bottomMargin * displayMetricsDensity).toInt()
+        }
 
         // タイトルテキストを更新する
         holder.tips?.text = nodeToTips(node)
@@ -204,6 +211,8 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
     var bindViewHolder : (holder : Holder, node : TreeViewNode) -> (Unit) = { _,_ -> }
 
     var layerIndent : Int = 15
+    var topMargin : Int = 1
+    var bottomMargin : Int = 1
 
 
     inner open class Holder(val view : View) : RecyclerView.ViewHolder(view) {
