@@ -1,19 +1,19 @@
 package com.xxxsarutahikoxxx.android.recyclertreeviewadapter
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import java.lang.RuntimeException
 
 /**
  * 既存の [RecyclerView] に対して [adapter] としてセットすることでツリー構造を表示することが可能なアダプター
@@ -21,6 +21,7 @@ import java.io.File
  * [RecyclerView] に対して [asTree] 関数を実行することでセットアップされる
  * */
 open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<RecyclerTreeViewAdapter.Holder>(){
+
     /** ディスプレイ密度。ノードの階層ずらしのために必要な情報。 */
     private var displayMetricsDensity : Float = 0f
 
@@ -54,7 +55,7 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
     /** ノードのクリックの処理。デフォルトではノードの展開状態の反転を行う。 */
     var onClickListener = { _ : View, node : TreeViewNode -> node.toggle() }
     /** ノードの長押しの処理。デフォルトではノードを選択する。 */
-    var onLongClickListener = { _ : View, node : TreeViewNode -> selected = node ; false }
+    var onLongClickListener = { _ : View, node : TreeViewNode -> if( selected == node ){ selected = null }else{ selected = node } ; false }
     /** ノードのタッチの処理。デフォルトでは何もしない。 */
     var onTouchListener = { _ : View, _ : MotionEvent, _ : TreeViewNode -> false }
     /** [selected] が変化した際のコールバック */
@@ -123,6 +124,9 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
         // Resources から 必要な情報を取得する（DisplayMetrics など）
         displayMetricsDensity = recyclerView.resources.displayMetrics.density
+
+        // layoutManager を設定する
+        recyclerView.layoutManager = LinearLayoutManager( recyclerView.context )
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) : Holder {
@@ -146,9 +150,9 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
         // 矢印の画像を更新する
         holder.arrow?.setImageResource(
             when {
-                node.isLeaf -> R.drawable.arrow_non
-                node.isExpanded -> R.drawable.arrow_down
-                else -> R.drawable.arrow_right
+                node.isLeaf -> R.drawable.tree_node_state_leaf
+                node.isExpanded -> R.drawable.tree_node_state_expanded
+                else -> R.drawable.tree_node_state_collapsed
             }
         )
 
@@ -174,6 +178,9 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 
         // インデントを更新する
         holder.margin?.layoutParams?.width = (layerIndent * displayMetricsDensity).toInt() * (node.layer-1)
+
+        // Base
+        (holder.view.layoutParams as? RecyclerView.LayoutParams)?.width = 3000 // 表示するのに十分な長さ
 
         // 追加的な効果を適用する
         bindViewHolder(holder, node)
@@ -224,16 +231,21 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
     }
 }
 
+/**
+ * */
 fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeViewRoot).()->(Unit) ) : RecyclerTreeViewAdapter {
-    layoutManager = LinearLayoutManager( context )
     adapter = RecyclerTreeViewAdapter( root.apply(init) )
 
     return adapter as RecyclerTreeViewAdapter
 }
-
 /**
  * [adapter] を [RecyclerTreeViewAdapter] として取得する
  *
  * [adapter] が存在しないか型変換できない場合は null を返す
  *  */
 val RecyclerView.treeAdapter : RecyclerTreeViewAdapter? get() = adapter as? RecyclerTreeViewAdapter
+
+
+var out : Any?
+    get() = throw RuntimeException("")
+    set(value) { Log.d("標準", "$value") }

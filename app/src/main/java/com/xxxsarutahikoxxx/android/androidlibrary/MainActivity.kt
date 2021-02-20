@@ -2,11 +2,14 @@ package com.xxxsarutahikoxxx.android.androidlibrary
 
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
+import android.widget.Button
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asTree
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
@@ -23,19 +26,30 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
+        createTree()
+    }
+    fun createTree(){
         RecyclerAsTree.asTree {
             create("c1")
             create("c2"){
                 create("c2-1")
                 create("c2-2"){
                     create("c2-2-1"){
-                        create("c2-2-1----------------------------------------------------------------------------")
+                        create("c2-2-1-------------1-------------2-------------3-------------4-------------5")
                     }
                 }
             }
             create("c3"){
                 create(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
             }
+            create("c4")
+            create("c5")
+            create("c6")
+            create("c7")
+            create("c8")
+            create("c9")
+            create("c10")
+            create("c11")
 
             expandAll()
         }.apply {
@@ -60,4 +74,5 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
 }
