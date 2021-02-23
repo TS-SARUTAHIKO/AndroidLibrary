@@ -246,6 +246,6 @@ fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeView
 val RecyclerView.treeAdapter : RecyclerTreeViewAdapter? get() = adapter as? RecyclerTreeViewAdapter
 
 
-var out : Any?
+internal var out : Any?
     get() = throw RuntimeException("")
     set(value) { Log.d("標準", "$value") }
