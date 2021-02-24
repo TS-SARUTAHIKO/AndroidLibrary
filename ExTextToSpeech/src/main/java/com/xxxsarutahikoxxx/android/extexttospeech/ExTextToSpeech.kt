@@ -59,7 +59,7 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
         if( sequences.isNotEmpty() ) {
             speakFirst()
         }else{
-            onEndOfUtterance()
+            onEndOfUtterance(0)
         }
     }
     override fun onError(utteranceId : String) {}
@@ -67,11 +67,11 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
     @CallSuper
     override fun onStop(utteranceId: String?, interrupted: Boolean) {
         super.onStop(utteranceId, interrupted)
-        onEndOfUtterance()
+        onEndOfUtterance(1)
     }
 
     /** 発話がキャンセルされたか、発話が終了してキューが空になった場合に呼ばれる */
-    open fun onEndOfUtterance(){
+    open fun onEndOfUtterance(code : Int){
 
     }
 

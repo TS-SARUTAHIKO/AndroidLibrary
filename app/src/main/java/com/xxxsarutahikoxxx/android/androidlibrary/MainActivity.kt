@@ -32,7 +32,11 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        TTS = ExTextToSpeech(baseContext)
+        TTS = object : ExTextToSpeech(baseContext){
+            override fun onEndOfUtterance(code : Int) {
+                out = "End"
+            }
+        }
 
         Playing_Button.apply {
             onPlay = { view, mode -> out = "Play : $mode" ;
