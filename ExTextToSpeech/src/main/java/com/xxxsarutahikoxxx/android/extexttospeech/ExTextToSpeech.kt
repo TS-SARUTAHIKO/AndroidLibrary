@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import androidx.annotation.CallSuper
 import java.util.*
 
 
@@ -38,7 +39,7 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
         }
     }
     private fun speakFirst(){
-        if( sequences.isNotEmpty() ) speak(sequences.removeAt(0))
+        speak(sequences.removeAt(0))
     }
     private fun speak(task : TTSTask){
         TTS {
@@ -53,10 +54,27 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
 
 
     override fun onStart(utteranceId : String) {}
+    @CallSuper
     override fun onDone(utteranceId : String) {
-        speakFirst()
+        if( sequences.isNotEmpty() ) {
+            speakFirst()
+        }else{
+            onEndOfUtterance()
+        }
     }
     override fun onError(utteranceId : String) {}
+
+    @CallSuper
+    override fun onStop(utteranceId: String?, interrupted: Boolean) {
+        super.onStop(utteranceId, interrupted)
+        onEndOfUtterance()
+    }
+
+    /** 発話がキャンセルされたか、発話が終了してキューが空になった場合に呼ばれる */
+    open fun onEndOfUtterance(){
+
+    }
+
 
     private inner class TTSTask(val locale : Locale?, val text : CharSequence, val queueMode : Int, val params : Bundle, val utteranceId : String)
 }
