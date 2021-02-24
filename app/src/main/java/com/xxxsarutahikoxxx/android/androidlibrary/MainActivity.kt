@@ -13,6 +13,8 @@ import android.widget.Button
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asTree
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
+import java.lang.RuntimeException
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +28,14 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        createTree()
+
+
+        Playing_Button.apply {
+            onPlay = { view, mode -> out = "Play : $mode" }
+            onPause = { view, mode -> out = "Pause : $mode" }
+        }
+
+        //createTree()
     }
     fun createTree(){
         RecyclerAsTree.asTree {
@@ -76,3 +85,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
+
+var out : Any?
+    get() = throw RuntimeException("")
+    set(value) { Log.d("標準出力", "$value") }
