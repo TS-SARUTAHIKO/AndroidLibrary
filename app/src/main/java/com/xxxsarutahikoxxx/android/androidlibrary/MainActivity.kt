@@ -2,6 +2,7 @@ package com.xxxsarutahikoxxx.android.androidlibrary
 
 import android.os.Bundle
 import android.os.Environment
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -10,13 +11,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Button
+import com.xxxsarutahikoxxx.android.extexttospeech.ExTextToSpeech
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asTree
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
 import java.lang.RuntimeException
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+    lateinit var TTS : ExTextToSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,10 +32,13 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-
+        TTS = ExTextToSpeech(baseContext)
 
         Playing_Button.apply {
-            onPlay = { view, mode -> out = "Play : $mode" }
+            onPlay = { view, mode -> out = "Play : $mode" ;
+                TTS.speak("We must respect the will of the individual", Locale.ENGLISH, TextToSpeech.QUEUE_FLUSH)
+                TTS.speak("私たちは個人の意思を尊重しなくてはならない", Locale.JAPANESE, TextToSpeech.QUEUE_ADD)
+            }
             onPause = { view, mode -> out = "Pause : $mode" }
         }
 

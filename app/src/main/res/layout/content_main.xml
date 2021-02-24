@@ -16,7 +16,6 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-
     <com.xxxsarutahikoxxx.android.basicui.MultiModeButton
         android:id="@+id/Playing_Button"
         app:src_play="@drawable/tree_node_state_expanded"
