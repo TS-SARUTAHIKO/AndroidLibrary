@@ -20,7 +20,7 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
     private val TTS = TextToSpeech(context, listener).apply { setOnUtteranceProgressListener(this@ExTextToSpeech) }
     fun TTS( func : TextToSpeech.()->(Any?) ) = TTS.func()
 
-    private val sequences : MutableList<TTSTask> = mutableListOf()
+    protected val sequences : MutableList<TTSTask> = mutableListOf()
 
     fun speak(text : CharSequence, locale : Locale? = null, queueMode : Int = TextToSpeech.QUEUE_ADD, params : Bundle = Bundle(), utteranceId : String = "NO-ID"){
         when( queueMode ){
@@ -30,11 +30,9 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
                 speak( TTSTask(locale, text, queueMode, params, utteranceId) )
             }
             TextToSpeech.QUEUE_ADD -> {
-                if( TTS.isSpeaking ){
-                    sequences.add( TTSTask(locale, text, queueMode, params, utteranceId) )
-                }else{
-                    speak( TTSTask(locale, text, queueMode, params, utteranceId) )
-                }
+                sequences.add( TTSTask(locale, text, queueMode, params, utteranceId) )
+
+                if( ! TTS.isSpeaking ) speakFirst()
             }
         }
     }
@@ -76,5 +74,5 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
     }
 
 
-    private inner class TTSTask(val locale : Locale?, val text : CharSequence, val queueMode : Int, val params : Bundle, val utteranceId : String)
+    protected inner class TTSTask(val locale : Locale?, val text : CharSequence, val queueMode : Int, val params : Bundle, val utteranceId : String)
 }
