@@ -16,23 +16,30 @@ class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : Int) : 
     // State 関係
     private var state : Int = 0
         set(value) {
-            field = value
-
             when( value ){
                 STATE_IDLING -> {
-                    revalidate()
-                    onStateChanged(this, mode, value)
-                    onPause(this, mode)
+                    if( prepareBeforePause(this) ){
+                        field = value
+                        revalidate()
+                        onStateChanged(this, mode, value)
+                        onPause(this, mode)
+                    }
                 }
                 STATE_PLAYING -> {
-                    revalidate()
-                    onStateChanged(this, mode, value)
-                    onPlay(this, mode)
+                    if( prepareBeforePlay(this) ){
+                        field = value
+                        revalidate()
+                        onStateChanged(this, mode, value)
+                        onPlay(this, mode)
+                    }
                 }
             }
         }
     val isPlaying : Boolean get() = (state == STATE_PLAYING)
     val isIdling : Boolean get() = (state == STATE_IDLING)
+
+    var prepareBeforePlay : (MultiModeButton)->(Boolean) = { true }
+    var prepareBeforePause : (MultiModeButton)->(Boolean) = { true }
 
     fun play(){ state = STATE_PLAYING }
     fun pause(){ state = STATE_IDLING }
