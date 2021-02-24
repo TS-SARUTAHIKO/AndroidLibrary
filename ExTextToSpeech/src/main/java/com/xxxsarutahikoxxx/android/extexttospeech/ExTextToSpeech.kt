@@ -13,7 +13,7 @@ import java.util.*
  * [speak] / [stop] 意外の独自処理のための関数は持たない。
  * [TextToSpeech] の関数を呼ぶ場合は [TTS] を用いて TTS {  } と表記すること
  * */
-class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListener) : UtteranceProgressListener() {
+open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListener) : UtteranceProgressListener() {
     constructor(context : Context) : this(context, TextToSpeech.OnInitListener { })
 
     private val TTS = TextToSpeech(context, listener).apply { setOnUtteranceProgressListener(this@ExTextToSpeech) }
