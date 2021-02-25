@@ -25,7 +25,7 @@ import java.io.Serializable
  * --- How to ---
  *
  * 初期状態でクリック(setOnClickListener)で play / pause の切り替え。
- * 長押し(setOnLongClickListener)でモードの切り替え([nextMode]) を行うようにリスナーが設定されている。
+ * 長押し(setOnLongClickListener)でモードの切り替え([nextMode]) を行った後にクリック動作を行うようにリスナーが設定されている。
  *
  * ボタンアクションに連動した処理は(setOnClickListener)ではなく、状態変化を [onPlay] / [onPause] で監視してを行うこと。
  *
@@ -171,7 +171,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
         }
 
         setOnClickListener { toggleState() }
-        setOnLongClickListener { nextMode() ; true }
+        setOnLongClickListener { nextMode() ; false }
 
         this.mode = mode
         this.state = state
