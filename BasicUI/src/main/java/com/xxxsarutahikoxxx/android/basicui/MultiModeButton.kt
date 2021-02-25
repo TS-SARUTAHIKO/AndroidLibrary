@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import androidx.annotation.CallSuper
 import androidx.appcompat.widget.AppCompatImageButton
 import java.io.Serializable
@@ -96,7 +97,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
 
 
     // Mode 関係
-    var mode : Int = 0
+    var mode : Int = -1
         set(value) {
             if( value !in 0.until(modeCount) || field == value ) return
 
@@ -107,8 +108,13 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
                 onModeChanged(this, value, state)
             }
         }
-    val modeCount : Int
-        get() = resourcesMap.maxOf { it.key.first } + 1
+    val modeCount : Int get(){
+        return if( resourcesMap.isEmpty() ){
+            0
+        }else{
+            resourcesMap.maxOf { it.key.first } + 1
+        }
+    }
 
     fun nextMode(){
         mode = (mode + 1) % modeCount
