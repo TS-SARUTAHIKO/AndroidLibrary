@@ -82,8 +82,8 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
     val isPlaying : Boolean get() = (state == STATE_PLAYING)
     val isIdling : Boolean get() = (state == STATE_IDLING)
 
-    var prepareBeforePlay : (MultiModeButton)->(Boolean) = { true }
-    var prepareBeforePause : (MultiModeButton)->(Boolean) = { true }
+    open var prepareBeforePlay : (MultiModeButton)->(Boolean) = { true }
+    open var prepareBeforePause : (MultiModeButton)->(Boolean) = { true }
 
     fun play(){ state = STATE_PLAYING }
     fun pause(){ state = STATE_IDLING }
@@ -91,9 +91,9 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
         if( isPlaying ) pause() else play()
     }
 
-    var onStateChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
-    var onPlay : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
-    var onPause : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
+    open var onStateChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
+    open var onPlay : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
+    open var onPause : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
 
 
     // Mode 関係
@@ -123,8 +123,8 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
         mode = (modeCount + mode - 1) % modeCount
     }
 
-    var prepareBeforeMode : (view : MultiModeButton)->(Boolean) = { true }
-    var onModeChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
+    open var prepareBeforeMode : (view : MultiModeButton)->(Boolean) = { true }
+    open var onModeChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
 
 
     // Resources 関係
@@ -150,7 +150,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
 
         onRevalidate(this)
     }
-    var onRevalidate : (view : MultiModeButton)->(Unit) = {  }
+    open var onRevalidate : (view : MultiModeButton)->(Unit) = {  }
 
 
     init {
