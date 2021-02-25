@@ -29,7 +29,8 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
             TextToSpeech.QUEUE_FLUSH -> {
                 sequences.clear() // TTS.stop() を行わないことで音のブツ切れを回避する
 
-                speak( TTSTask(locale, text, queueMode, params, utteranceId) )
+                sequences.add( TTSTask(locale, text, queueMode, params, utteranceId) )
+                speakFirst()
             }
             TextToSpeech.QUEUE_ADD -> {
                 sequences.add( TTSTask(locale, text, queueMode, params, utteranceId) )
@@ -58,12 +59,12 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
     override fun onDone(utteranceId : String) {
         if( sequences.isNotEmpty() && sequences[0].utteranceId == utteranceId ){
             sequences.removeAt(0)
-        }
 
-        if( sequences.isNotEmpty() ) {
-            speakFirst()
-        }else{
-            onEndOfUtterance(0)
+            if( sequences.isNotEmpty() ) {
+                speakFirst()
+            }else{
+                onEndOfUtterance(0)
+            }
         }
     }
     override fun onError(utteranceId : String) {}
