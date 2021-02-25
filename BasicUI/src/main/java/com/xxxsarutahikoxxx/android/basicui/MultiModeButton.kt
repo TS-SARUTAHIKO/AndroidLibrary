@@ -49,7 +49,7 @@ import java.io.Serializable
  *
  * [onRevalidate] : 状態やモードが変化してリソース設定が行われた時に呼ばれる
  * */
-class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : Int) : AppCompatImageButton(context, attrs, defStyle) {
+open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : Int) : AppCompatImageButton(context, attrs, defStyle) {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context) : this(context, null)
 
