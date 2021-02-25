@@ -56,7 +56,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
 
 
     // State 関係
-    private var state : Int = 0
+    protected var state : Int = 0
         set(value) {
             if( state == value ) return
 
