@@ -22,7 +22,9 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
 
     protected val sequences : MutableList<TTSTask> = mutableListOf()
 
-    fun speak(text : CharSequence, locale : Locale? = null, queueMode : Int = TextToSpeech.QUEUE_ADD, params : Bundle = Bundle(), utteranceId : String = "NO-ID"){
+
+    private var IDcount : Int = 0
+    fun speak(text : CharSequence, locale : Locale? = null, queueMode : Int = TextToSpeech.QUEUE_ADD, params : Bundle = Bundle(), utteranceId : String = "auto:$IDcount"){
         when( queueMode ){
             TextToSpeech.QUEUE_FLUSH -> {
                 sequences.clear() // TTS.stop() を行わないことで音のブツ切れを回避する
@@ -32,12 +34,12 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
             TextToSpeech.QUEUE_ADD -> {
                 sequences.add( TTSTask(locale, text, queueMode, params, utteranceId) )
 
-                if( ! TTS.isSpeaking ) speakFirst()
+                if( sequences.size == 1 ) speakFirst()
             }
         }
     }
     private fun speakFirst(){
-        speak(sequences.removeAt(0))
+        speak(sequences[0])
     }
     private fun speak(task : TTSTask){
         TTS {
@@ -54,6 +56,10 @@ open class ExTextToSpeech(context : Context, listener : TextToSpeech.OnInitListe
     override fun onStart(utteranceId : String) {}
     @CallSuper
     override fun onDone(utteranceId : String) {
+        if( sequences.isNotEmpty() && sequences[0].utteranceId == utteranceId ){
+            sequences.removeAt(0)
+        }
+
         if( sequences.isNotEmpty() ) {
             speakFirst()
         }else{
