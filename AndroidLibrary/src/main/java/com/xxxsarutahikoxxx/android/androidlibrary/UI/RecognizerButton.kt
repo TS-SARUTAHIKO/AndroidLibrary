@@ -17,7 +17,7 @@ import java.util.*
  *
  * マニュフェストでパーミッション（録音・インターネット）を設定すること
  * */
-class RecognizerButton(context : Context, attrs : AttributeSet?, defStyleAttr : Int) : MultiModeButton(context, attrs, defStyleAttr) {
+class RecognizerButton(context : Context, attrs : AttributeSet?, defStyle : Int) : MultiModeButton(context, attrs, defStyle) {
     constructor(context : Context, attrs : AttributeSet?) : this(context, attrs, 0)
     constructor(context : Context) : this(context, null)
 
@@ -102,7 +102,11 @@ class RecognizerButton(context : Context, attrs : AttributeSet?, defStyleAttr : 
         setResource(MODE_SINGLE, STATE_PLAYING, R.drawable.button_round_blue, false)
         setResource(MODE_SINGLE, STATE_IDLING, R.drawable.button_round_gray, false)
 
-        if( mode == -1 ) mode = 0
+        context.obtainStyledAttributes(attrs, R.styleable.MultiModeButton, 0, defStyle).run {
+            mode = getInt(R.styleable.MultiModeButton_default_mode, 0)
+
+            recycle()
+        }
     }
 
     companion object {
