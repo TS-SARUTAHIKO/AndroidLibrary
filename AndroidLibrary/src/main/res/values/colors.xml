@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lightGray">#E0E0E0</color>
+    <color name="strokeGold">#bc9434</color>
+    <color name="primaryBlue">#162EF6</color><!-- 10 進数 (22, 46, 246) -->
+</resources>

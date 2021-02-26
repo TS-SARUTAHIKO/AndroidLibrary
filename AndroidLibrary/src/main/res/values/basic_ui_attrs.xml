@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MultiModeButton">
+        <attr name="default_state" format="enum">
+            <enum name="play" value="0" />
+            <enum name="pause" value="1" />
+        </attr>
+
+        <attr name="default_mode" format="integer"/>
+
+        <attr name="src_play" format="reference"/>
+        <attr name="src_pause" format="reference"/>
+        <attr name="src_play1" format="reference"/>
+        <attr name="src_pause1" format="reference"/>
+        <attr name="src_play2" format="reference"/>
+        <attr name="src_pause2" format="reference"/>
+    </declare-styleable>
+</resources>

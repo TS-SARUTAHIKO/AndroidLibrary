@@ -9,9 +9,7 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.ViewGroup
-import android.widget.Button
-import com.xxxsarutahikoxxx.android.extexttospeech.ExTextToSpeech
+import com.xxxsarutahikoxxx.android.androidlibrary.TextToSpeech.TextSpeech
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asTree
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
@@ -20,7 +18,7 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var TTS : ExTextToSpeech
+    lateinit var TTS : TextSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,18 +30,12 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        TTS = object : ExTextToSpeech(baseContext){
-            override fun onEndOfUtterance(code : Int) {
-                out = "End"
-            }
+        TTS = TextSpeech(baseContext).apply{
+            onEndOfUtterance = { out = "End" }
         }
 
         Playing_Button.apply {
-            onPlay = { view, mode -> out = "Play : $mode" ;
-                TTS.speak("We must respect the will of the individual", Locale.ENGLISH, TextToSpeech.QUEUE_FLUSH)
-                TTS.speak("私たちは個人の意思を尊重しなくてはならない", Locale.JAPANESE, TextToSpeech.QUEUE_ADD)
-            }
-            onPause = { view, mode -> out = "Pause : $mode" }
+
         }
 
         //createTree()

@@ -16,10 +16,8 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.xxxsarutahikoxxx.android.basicui.MultiModeButton
+    <com.xxxsarutahikoxxx.android.androidlibrary.UI.RecognizerButton
         android:id="@+id/Playing_Button"
-        app:src_play="@drawable/tree_node_state_expanded"
-        app:src_pause="@drawable/tree_node_state_collapsed"
         android:layout_width="100dp"
         android:layout_height="100dp"
         app:layout_constraintBottom_toBottomOf="parent"

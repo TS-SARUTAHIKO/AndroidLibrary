@@ -1,5 +1,4 @@
-include ':ExTextToSpeech'
-include ':BasicUI'
+include ':AndroidLibrary'
 include ':RecyclerTreeViewAdapter'
 include ':app'
 rootProject.name = "AndroidLibrary"
