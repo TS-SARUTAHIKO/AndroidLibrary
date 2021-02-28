@@ -12,7 +12,6 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.core.content.ContextCompat
 import com.xxxsarutahikoxxx.android.androidlibrary.getPermissions
-import com.xxxsarutahikoxxx.android.androidlibrary.out
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -20,7 +19,11 @@ import kotlin.concurrent.thread
 /**
  * 音声認識のための [SpeechRecognizer] のラッパークラス
  *
+ * マニフェストファイルに権限を付加すること(RECORD_AUDIO・INTERNET)
+ *
  * 開始音・終了音のキャンセル機能を追加
+ *
+ * 連続認識機能を追加
  *
  * イベントリスナーをコールバック関数形式で追加
  * */
@@ -28,11 +31,20 @@ open class Recognizer(
     val context : Context,
 
     /** 音声認識時の開始の通知音を鳴らすかどうか */
-    var preRing : Boolean = true,
+    var startRing : Boolean = true,
     /** 音声認識時の終了の通知音を鳴らすかどうか */
-    var postRing : Boolean = false,
+    var endRing : Boolean = false,
+    /** 連続認識時の無音での認識終了の許容回数 */
+    var errorLimit : Int = -1,
+
     /** 読み取りを行う言語 */
-    var language : Locale = Locale.ENGLISH
+    var locale : Locale = Locale.getDefault(),
+    /** オフラインで音声認識を行うかどうか */
+    var offline : Boolean = false,
+    /** 途中結果を取得するかどうか */
+    var partialResults : Boolean = false,
+    /** 取得する結果の個数 */
+    var maxResults : Int = 4
 ){
     private var onReadyRorRecognition = requestPermission()
     private var recognizer : SpeechRecognizer? = null
@@ -42,7 +54,9 @@ open class Recognizer(
 
     /** 音声認識(発音チェック)用のパーミッションを要求する */
     private fun requestPermission() : Boolean {
-        return (context as Activity).getPermissions(Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO)
+        val list = if( offline ) listOf(Manifest.permission.RECORD_AUDIO) else listOf(Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO)
+
+        return (context as Activity).getPermissions( *list.toTypedArray() )
     }
     /** [SpeechRecognizer]の設定を行う */
     private fun SpeechRecognizer.setup(){
@@ -55,37 +69,44 @@ open class Recognizer(
                 recState = RecState.Recording
 
                 thread {
-                    Thread.sleep(DELAY_ON_PRERINF)
+                    Thread.sleep(DELAY_ON_START_RING)
                     reloadRingVolume()
                 }
             }
+
             override fun onBeginningOfSpeech() {
                 this@Recognizer.onBeginningOfSpeech()
             }
             override fun onEndOfSpeech() {
                 this@Recognizer.onEndOfSpeech()
             }
-            override fun onError(error: Int) {
-                onEndOfRecognition()
-                onEnd(false)
-            }
             override fun onPartialResults(results: Bundle?) {
                 val result : ArrayList<String> = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: arrayListOf()
 
-                if( result.isNotEmpty() ){
-                    onPartialResults(result.toList())
-                }
+                if( result.isNotEmpty() ) onPartialResults(result.toList())
             }
-
             override fun onResults(results: Bundle?) {
                 val mResult : ArrayList<String> = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: arrayListOf()
-
-                onEndOfRecognition()
-
                 onResult(mResult.toList())
-                onEnd(true)
+
+                onEndOfRecognition(true)
+            }
+
+            override fun onError(error: Int) {
+                onEndOfRecognition(false)
             }
         })
+    }
+
+    /**
+     * 音声認識を中断する
+     * */
+    fun cancel(){
+        if( isActive ){
+            recognizer?.cancel()
+
+            onEndOfRecognition(false)
+        }
     }
     /**
      * 終了処理、リソースの解放とミュート解除を行う
@@ -94,59 +115,63 @@ open class Recognizer(
         recognizer?.destroy()
         unmuteRing()
     }
-    /**
-     * 音声認識を中断する
-     * */
-    fun cancel(){
-        recognizer?.cancel()
-
-        onEndOfRecognition()
-        onEnd(false)
-    }
 
     /** 音声認識を開始する */
     fun recognize(){
+        if( isActive ) return
+
         if( ! onReadyRorRecognition ){
             onReadyRorRecognition = requestPermission()
         }else{
-            onPrepare()
-
-            recognizer = SpeechRecognizer.createSpeechRecognizer(context).apply { setup() }
-
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "$language");
-            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 4)
-            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-
-            // 音声認識スタート
-            onStart()
-
-            reloadRingVolume(RecState.Preparing)
-
-            recognizer?.startListening(intent)
+            if( onPrepare() ){
+                startRecognize()
+                onStart(true)
+            }
         }
     }
+    /** 音声認識を行う */
+    private fun startRecognize(){
+        recognizer = SpeechRecognizer.createSpeechRecognizer(context).apply { setup() }
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName);
+
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "${locale.language}");
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults)
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partialResults)
+        intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, offline)
+
+        reloadRingVolume(RecState.Preparing)
+
+        recognizer?.startListening(intent)
+    }
+
+    var errorCount = 0
+
     /**
      * 音声認識の終了時に呼び出される
      * */
-    private fun onEndOfRecognition(){
+    private fun onEndOfRecognition(success : Boolean){
         recState = RecState.Idling
         recognizer?.destroy()
         recognizer = null
 
         thread {
-            Thread.sleep(DELAY_ON_POSTRINF)
+            Thread.sleep(DELAY_ON_END_RING)
             reloadRingVolume()
+        }
+
+        if( success ) errorCount = 0 else errorCount ++
+        if( errorCount <= errorLimit ){
+            startRecognize()
+            onStart(false)
+        }else{
+            onEnd(success)
         }
     }
 
 
     // イベントリスナー関数
-    /** 音声認識の開始前に呼び出される。コールバック用。 */
-    open var onPrepare : ()->(Unit) = {  }
-    /** 音声認識の開始時に呼び出される関数。コールバック用。 */
-    open var onStart : ()->(Unit) = {  }
     /** 音声入力が始まった時に呼び出される関数。コールバック用 */
     open var onBeginningOfSpeech : ()->(Unit) = {  }
     /** 音声入力が終わった時に呼び出される関数。コールバック用 */
@@ -155,7 +180,12 @@ open class Recognizer(
     open var onPartialResults : (candidates : List<String>)->(Unit) = {  }
     /** 音声認識が成功した時に呼び出される関数。コールバック用。 */
     open var onResult : (candidates : List<String>)->(Unit) = {  }
-    /** 音声認識が終了した時に呼び出される関数（エラー終了 or キャンセル success == false・正常終了 success == true）。コールバック用。 */
+
+    /** 音声認識の開始前に呼び出される。この関数が false を返すと音声認識は開始されない。連続認識でも一度のみ。 */
+    open var onPrepare : ()->(Boolean) = { true }
+    /** 音声認識の開始時に呼び出される関数。beginning = true ならば（連続認識の）最初の一回目。コールバック用。 */
+    open var onStart : (beginning : Boolean)->(Unit) = {  }
+    /** 音声認識が終了した時に呼び出される関数。連続認識でも一度のみ。（エラー終了 or キャンセル success == false・正常終了 success == true）。コールバック用。 */
     open var onEnd : (success : Boolean)->(Unit) = {  }
     /** 状態の切り替え時に呼び出される関数。コールバック用 */
     open var onStateChanged : (pre : RecState, post : RecState)->(Unit) = { _, _ -> }
@@ -213,8 +243,8 @@ open class Recognizer(
 
         val ring = when( recState ){
             RecState.Idling -> { true }
-            RecState.Preparing -> { preRing }
-            RecState.Recording -> { postRing }
+            RecState.Preparing -> { startRing }
+            RecState.Recording -> { endRing }
         }
         if( ring ){
             unmuteRing()
@@ -228,8 +258,8 @@ open class Recognizer(
         var RECOGNIZER_RING_STREAM = AudioManager.STREAM_RING
 
         /** 開始時のアラームをミュートするための調整時間 */
-        var DELAY_ON_PRERINF : Long = 500
+        var DELAY_ON_START_RING : Long = 500
         /** 終了時のアラームをミュートするための調整時間 */
-        var DELAY_ON_POSTRINF : Long = 1000
+        var DELAY_ON_END_RING : Long = 1000
     }
 }

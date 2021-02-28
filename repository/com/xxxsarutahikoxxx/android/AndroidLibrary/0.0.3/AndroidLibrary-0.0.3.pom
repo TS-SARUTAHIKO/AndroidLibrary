@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.xxxsarutahikoxxx.android</groupId>
-  <artifactId>RecyclerTreeViewAdapter</artifactId>
-  <version>0.0.13</version>
+  <artifactId>AndroidLibrary</artifactId>
+  <version>0.0.3</version>
   <packaging>aar</packaging>
   <dependencies>
     <dependency>

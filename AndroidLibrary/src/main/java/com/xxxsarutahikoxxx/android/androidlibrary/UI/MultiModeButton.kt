@@ -64,7 +64,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
                     if( prepareBeforePause(this) ){
                         field = value
                         revalidate()
-                        onStateChanged(this, mode, value)
+                        onStateChanged(this, value)
                         onPause(this, mode)
                     }
                 }
@@ -72,7 +72,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
                     if( prepareBeforePlay(this) ){
                         field = value
                         revalidate()
-                        onStateChanged(this, mode, value)
+                        onStateChanged(this, value)
                         onPlay(this, mode)
                     }
                 }
@@ -90,7 +90,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
         if( isPlaying ) pause() else play()
     }
 
-    open var onStateChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
+    open var onStateChanged : (view : MultiModeButton, state : Int)->(Unit) = { _, _ -> }
     open var onPlay : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
     open var onPause : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
 
@@ -104,7 +104,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
                 field = value
 
                 revalidate()
-                onModeChanged(this, value, state)
+                onModeChanged(this, value)
             }
         }
     val modeCount : Int get(){
@@ -123,7 +123,7 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
     }
 
     open var prepareBeforeMode : (view : MultiModeButton)->(Boolean) = { true }
-    open var onModeChanged : (view : MultiModeButton, state : Int, mode : Int)->(Unit) = { _, _, _ -> }
+    open var onModeChanged : (view : MultiModeButton, mode : Int)->(Unit) = { _, _ -> }
 
 
     // Resources 関係

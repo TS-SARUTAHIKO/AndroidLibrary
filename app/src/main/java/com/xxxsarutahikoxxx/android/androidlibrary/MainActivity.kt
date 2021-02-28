@@ -2,7 +2,6 @@ package com.xxxsarutahikoxxx.android.androidlibrary
 
 import android.os.Bundle
 import android.os.Environment
-import android.speech.tts.TextToSpeech
 import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -14,11 +13,11 @@ import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asTree
 import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
 import java.lang.RuntimeException
-import java.util.*
-
+import com.xxxsarutahikoxxx.android.androidlibrary.Recognizer.Recognizer
 
 class MainActivity : AppCompatActivity() {
     lateinit var TTS : TextSpeech
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         Playing_Button.apply {
-
+            recognizer {
+                onStart = { out = "開始 : $it" }
+                onEnd = { out = "終了" }
+                onResult = { out = it }
+            }
         }
 
         //createTree()
