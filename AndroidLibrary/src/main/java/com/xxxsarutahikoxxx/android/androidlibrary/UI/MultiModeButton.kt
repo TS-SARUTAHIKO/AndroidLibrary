@@ -180,6 +180,8 @@ open class MultiModeButton(context: Context, attrs: AttributeSet?, defStyle : In
 
     // Save & Restore
     override fun onSaveInstanceState(): Parcelable {
+        pause()
+
         return Bundle().apply {
             putSerializable("ClassName", this@MultiModeButton::class.java)
             putParcelable("Parent", super.onSaveInstanceState())

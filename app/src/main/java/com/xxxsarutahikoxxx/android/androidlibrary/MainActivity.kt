@@ -1,5 +1,7 @@
 package com.xxxsarutahikoxxx.android.androidlibrary
 
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -14,6 +16,7 @@ import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
 import java.lang.RuntimeException
 import com.xxxsarutahikoxxx.android.androidlibrary.Recognizer.Recognizer
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     lateinit var TTS : TextSpeech
@@ -33,13 +36,7 @@ class MainActivity : AppCompatActivity() {
             onEndOfUtterance = { out = "End" }
         }
 
-        Playing_Button.apply {
-            recognizer {
-                onStart = { out = "開始 : $it" }
-                onEnd = { out = "終了" }
-                onResult = { out = it }
-            }
-        }
+        Playing_Button.apply {  }
 
         //createTree()
     }

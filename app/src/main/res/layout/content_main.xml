@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.xxxsarutahikoxxx.android.androidlibrary.UI.RecognizerButton
+    <com.xxxsarutahikoxxx.android.androidlibrary.UI.RecorderButton
         android:id="@+id/Playing_Button"
         android:layout_width="100dp"
         android:layout_height="100dp"

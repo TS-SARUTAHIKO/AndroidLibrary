@@ -85,10 +85,6 @@ class RecognizerButton(context : Context, attrs : AttributeSet?, defStyle : Int)
             recycle()
         }
     }
-    override fun onSaveInstanceState(): Parcelable {
-        pause()
-        return super.onSaveInstanceState()
-    }
 
 
     companion object {
