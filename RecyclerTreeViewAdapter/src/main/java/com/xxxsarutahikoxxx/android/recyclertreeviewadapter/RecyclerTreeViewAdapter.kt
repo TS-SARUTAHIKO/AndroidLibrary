@@ -1,5 +1,6 @@
 package com.xxxsarutahikoxxx.android.recyclertreeviewadapter
 
+import android.Manifest
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +20,44 @@ import java.lang.RuntimeException
  * 既存の [RecyclerView] に対して [adapter] としてセットすることでツリー構造を表示することが可能なアダプター
  *
  * [RecyclerView] に対して [asTree] 関数を実行することでセットアップされる
+ *
+ * ノードの構造状態が変更されたときは自動的にツリーに変更が通知される
+ *
+ * ノードの情報が変更されてビューを更新する必要がる場合は [notifyTreeItemChanged] によって通知する
+ *
+ * --- 動作 ---
+ *
+ * ・ クリック -> ノードの展開状態の変更
+ *
+ * ・ 長押し -> ノードの選択
+ *
+ * ・ タッチ -> 何もしない
+ *
+ * クリック、長押し、タッチ時の処理は [onClickListener] / [onLongClickListener] / [onTouchListener] を変更することで実装できる
+ *
+ * [onSelected] によってノード選択時の処理を実装できる
+ *
+ * --- 項目の表示 ---
+ *
+ * デフォルトではツリーの各アイテムはシンプルな　R.layout.recycler_tree_view_simple_row によって表示される
+ *
+ * このレイアウトの表示する要素は Icon (id = TreeViewRow_Icon), Title (id = TreeViewRow_Title), Tips (id = TreeViewRow_Tips), 開閉状態 (id = TreeViewRow_Arrow), マージン (id = TreeViewRow_Margin) である
+ *
+ * より複雑な独自レイアウトで表示するならば [nodeToLayout] を変更して返り値としてレイアウトIDを返却すること
+ *
+ * Q. 表示されるタイトルを変更する -> A. [nodeToTitle] を変更する
+ *
+ * Q. 表示されるTipsを変更する -> A. [nodeToTips] を変更する
+ *
+ * Q. 表示されるアイコンを変更する -> A. [nodeToIconId] を変更する
+ *
+ * Q. ノードごとに表示するレイアウトを変更する。
+ * A. [nodeToLayout] を変更する
+ * E.G. treeAdapter.nodeToLayout = { node : TreeViewNode -> when( node.content ){ else -> R.layout.recycler_tree_view_simple_row } }
+ *
+ * Q. 独自のレイアウトを使用した際にレイアウトに独自の処理を適用する -> A. [bindViewHolder] を変更する
+
+ *
  * */
 open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<RecyclerTreeViewAdapter.Holder>(){
 
@@ -221,6 +260,15 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
     var topMargin : Int = 1
     var bottomMargin : Int = 1
 
+    /**
+     * ノードのコンテンツとして [content] を持つノードの状態変更を通知する
+     * */
+    fun notifyTreeItemChanged(content : Any?){
+        treeItems.forEach {
+            if( it.content == content ) notifyItemChanged(treeItems.indexOf(it))
+        }
+    }
+
 
     inner open class Holder(val view : View) : RecyclerView.ViewHolder(view) {
         open val margin = view.findViewById<View?>(R.id.TreeViewRow_Margin)
@@ -232,8 +280,29 @@ open class RecyclerTreeViewAdapter(root : TreeViewRoot) : RecyclerView.Adapter<R
 }
 
 /**
+ * [RecyclerView] をツリービューとして扱う
+ *
+ * [root] をルートとして、続く [root] に対する初期化関数でツリー構造を構築する
+ *
+ * root 自体はツリーに表示されない
+ *
+ * root を指定しない場合は自動的に content = "Root" で初期化されたルートが作成される
+ *
+ * root に指定するオブジェクトを treeRoot( content, childFactory, init ) で childFactory を指定することで再帰的に自動構築できる
+ *
+ * --- (e.g.) ---
+ *
+ * // 指定したディレクトリーをルートとする全ファイルを表示するツリービュー
+ *
+ * val childFactory = { file : File -> if( file.isDirectory ) file.listFiles().toList() else listOf() }
+ *
+ * val root = treeRoot(rootDirectory, childFactory)
+ *
+ * Recycler.asTree( root ){  }
+ *
+ * --- ---
  * */
-fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeViewRoot).()->(Unit) ) : RecyclerTreeViewAdapter {
+fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeViewRoot).()->(Unit) = {} ) : RecyclerTreeViewAdapter {
     adapter = RecyclerTreeViewAdapter( root.apply(init) )
 
     return adapter as RecyclerTreeViewAdapter
@@ -244,6 +313,15 @@ fun RecyclerView.asTree(root : TreeViewRoot = treeRoot("Root"), init : (TreeView
  * [adapter] が存在しないか型変換できない場合は null を返す
  *  */
 val RecyclerView.treeAdapter : RecyclerTreeViewAdapter? get() = adapter as? RecyclerTreeViewAdapter
+
+/**
+ * [RecyclerView] を指定したパスをルートとする Directory Explorer として構築する
+ *
+ * 必要なパーミッション（Manifest.permission.READ_EXTERNAL_STORAGE など）を事前に取得しておくこと
+ * */
+fun RecyclerView.asExplorer(root : File) : RecyclerTreeViewAdapter {
+    return asTree( treeRoot(root, { if( it.isDirectory ) it.listFiles().toList() else listOf() }) )
+}
 
 
 internal var out : Any?

@@ -8,6 +8,8 @@ import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
+import com.xxxsarutahikoxxx.android.androidlibrary.Dialog.browseWithDialog
 import kotlin.concurrent.thread
 
 
@@ -49,8 +51,12 @@ fun Activity.getPermissions(vararg permission : String) : Boolean {
 }
 
 /** Browse */
-fun Activity.browse(url : String){
-    val uri : Uri = Uri.parse(url)
-    val i : Intent = Intent(Intent.ACTION_VIEW, uri)
-    startActivity(i);
+fun FragmentActivity.browse(url : String, dialog : Boolean = true){
+    if( dialog ){
+        browseWithDialog(url)
+    }else{
+        val uri : Uri = Uri.parse(url)
+        val i : Intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(i);
+    }
 }

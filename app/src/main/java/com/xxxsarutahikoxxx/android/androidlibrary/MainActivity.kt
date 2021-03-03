@@ -1,5 +1,6 @@
 package com.xxxsarutahikoxxx.android.androidlibrary
 
+import android.Manifest
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -16,10 +17,11 @@ import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.create
 import kotlinx.android.synthetic.main.content_main.*
 import java.lang.RuntimeException
 import com.xxxsarutahikoxxx.android.androidlibrary.Recognizer.Recognizer
+import com.xxxsarutahikoxxx.android.recyclertreeviewadapter.asExplorer
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
-    lateinit var TTS : TextSpeech
+    val TTS : TextSpeech by lazy { TextSpeech(baseContext) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,13 +34,23 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        TTS = TextSpeech(baseContext).apply{
+
+        TTS.apply{
             onEndOfUtterance = { out = "End" }
         }
 
-        Playing_Button.apply {  }
+        Playing_Button.apply {
+            setOnClickListener {
+
+            }
+        }
+
 
         //createTree()
+    }
+    fun createExplorer(){
+        val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        RecyclerAsTree.asExplorer( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).parentFile!! )
     }
     fun createTree(){
         RecyclerAsTree.asTree {
