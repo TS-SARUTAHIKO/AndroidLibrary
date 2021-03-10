@@ -103,9 +103,8 @@ open class Recognizer(
      * */
     fun cancel(){
         if( isActive ){
+            errorCount = errorLimit // 連続再生を抑制する
             recognizer?.cancel()
-
-            onEndOfRecognition(false)
         }
     }
     /**
@@ -161,8 +160,8 @@ open class Recognizer(
             reloadRingVolume()
         }
 
-        if( success ) errorCount = 0 else errorCount ++
-        if( errorCount <= errorLimit ){
+        if( success ) errorCount = 0 else if( errorCount != Int.MAX_VALUE ) errorCount ++
+        if( errorCount <= errorLimit && (errorCount != Int.MAX_VALUE) ){
             startRecognize()
             onStart(false)
         }else{

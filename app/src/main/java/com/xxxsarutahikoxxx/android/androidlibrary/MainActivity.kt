@@ -1,6 +1,7 @@
 package com.xxxsarutahikoxxx.android.androidlibrary
 
 import android.Manifest
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -44,7 +45,6 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-
 
         //createTree()
     }
